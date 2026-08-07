@@ -1,4 +1,4 @@
-# 23PA1A12D9 – Day 3 Salesforce Assignment
+# Day 3 Salesforce Assignment
 
 ## 📌 Overview
 
