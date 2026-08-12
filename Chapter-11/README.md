@@ -1,18 +1,67 @@
-# Salesforce DX Project: Next Steps
+# Chapter 11 — Salesforce Candidate API Integration
 
-Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
+## Overview
 
-## How Do You Plan to Deploy Your Changes?
+Chapter 11 demonstrates a Salesforce-to-external-API integration using asynchronous Queueable Apex.
 
-Do you want to deploy a set of changes, or create a self-contained application? Choose a [development model](https://developer.salesforce.com/tools/vscode/en/user-guide/development-models).
+The implementation synchronizes selected candidate applications from Salesforce with an external recruitment API. The project includes a custom Salesforce object, custom fields, an Apex trigger, Queueable Apex, HTTP callouts, Named Credentials, error handling, retry handling, mock API testing, and Lightning Web Components.
 
-## Configure Your Salesforce DX Project
+---
 
-The `sfdx-project.json` file contains useful configuration information for your project. See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm) in the _Salesforce DX Developer Guide_ for details about this file.
+## Salesforce Components
 
-## Read All About It
+### Custom Object
 
-- [Salesforce Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
-- [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)
+**Application__c**
+
+### Custom Fields
+
+| Field | Type | Purpose |
+|---|---|---|
+| Status__c | Picklist | Stores application status |
+| Integration_Status__c | Picklist | Tracks integration status |
+| External_Candidate_Id__c | Text | Stores external candidate ID |
+| Integration_Error__c | Long Text Area | Stores integration errors |
+| Last_Integration_Attempt__c | Date/Time | Stores the last integration attempt |
+
+---
+
+## Apex Classes
+
+### CandidateSyncQueueable.cls
+
+Handles asynchronous synchronization of selected applications with the external recruitment API.
+
+### CandidateSyncQueueableTest.cls
+
+Tests the Queueable Apex integration and HTTP callout response handling.
+
+### ApplicationTriggerTest.cls
+
+Tests the application trigger and verifies that integration processing starts when an application is selected.
+
+---
+
+## Apex Trigger
+
+### ApplicationTrigger.trigger
+
+The trigger starts the candidate synchronization process when an application reaches the required status.
+
+Integration flow:
+
+```text
+Application__c
+      |
+      | Status = Selected
+      v
+ApplicationTrigger
+      |
+      v
+CandidateSyncQueueable
+      |
+      v
+HTTP Callout
+      |
+      v
+Recruitment API
